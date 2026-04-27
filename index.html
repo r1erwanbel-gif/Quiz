@@ -650,7 +650,7 @@ async function loadSheet() {
   show('loading');
   setStatus(false);
   try {
-    const res = await fetch(APPS_SCRIPT_URL);
+    const res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     allQuestions = data.filter(r => r.question && r.opt_a && r.reponse);
