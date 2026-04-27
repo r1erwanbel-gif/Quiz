@@ -806,6 +806,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') setCustomNum();
   });
 });
+
+function toggleTimer() {
   timerOn = !timerOn;
   document.getElementById('timerToggle').classList.toggle('on', timerOn);
   document.getElementById('timerLabel').textContent = timerOn ? 'Activé (30s / question)' : 'Désactivé';
