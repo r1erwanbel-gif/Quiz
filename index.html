@@ -87,11 +87,12 @@ header {
 /* ── SCREENS ── */
 .screen { display:none; }
 .screen.active { display:block; animation: up 0.35s ease; }
+#loading.active, #error.active { display:flex; }
 @keyframes up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
 /* ── LOADING ── */
 #loading {
-  display:flex; flex-direction:column;
+  flex-direction:column;
   align-items:center; justify-content:center;
   min-height:60vh; gap:1.2rem;
 }
@@ -219,7 +220,28 @@ header {
 .num-pill:hover { border-color:var(--gold); color:var(--white); }
 .num-pill.on { background:var(--gold); border-color:var(--gold); color:#0d0d0d; font-weight:600; }
 
-/* timer toggle */
+.custom-num-wrap {
+  display:flex; align-items:center; gap:0.6rem;
+  margin-top:0.7rem;
+}
+.custom-num-label { font-size:0.82rem; color:var(--grey2); }
+.custom-num-input {
+  width:80px; padding:0.45rem 0.7rem;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--white); font-family:'DM Sans',sans-serif; font-size:0.9rem;
+  border-radius:var(--radius); outline:none;
+  transition:border-color 0.15s;
+}
+.custom-num-input:focus { border-color:var(--gold); }
+.custom-num-input::placeholder { color:var(--grey); }
+.custom-num-btn {
+  padding:0.45rem 0.9rem;
+  background:var(--surface2); border:1px solid var(--border);
+  color:var(--grey2); font-family:'DM Sans',sans-serif; font-size:0.82rem;
+  cursor:pointer; border-radius:var(--radius); transition:all 0.15s;
+}
+.custom-num-btn:hover { border-color:var(--gold); color:var(--gold); }
+.custom-num-btn.applied { border-color:var(--gold); color:var(--gold); background:rgba(212,168,67,0.1); }
 .toggle-wrap { display:flex; align-items:center; gap:0.8rem; }
 .toggle {
   width:44px; height:23px;
@@ -469,7 +491,7 @@ header {
 
 /* error screen */
 #error {
-  display:flex; flex-direction:column;
+  flex-direction:column;
   align-items:center; justify-content:center;
   min-height:60vh; gap:1rem; text-align:center;
 }
@@ -533,6 +555,11 @@ header {
   <div class="config-block">
     <div class="sec-label">Nombre de questions</div>
     <div class="num-row" id="numRow"></div>
+    <div class="custom-num-wrap">
+      <span class="custom-num-label">Nombre exact :</span>
+      <input type="number" id="customNum" class="custom-num-input" min="1" max="200" placeholder="ex. 7">
+      <button class="custom-num-btn" onclick="setCustomNum()">OK</button>
+    </div>
   </div>
 
   <div class="config-block">
@@ -680,6 +707,10 @@ function buildSetup() {
       document.querySelectorAll('.num-pill').forEach(x=>x.classList.remove('on'));
       p.classList.add('on');
       numQ = n;
+      // reset custom input
+      const ci = document.getElementById('customNum');
+      if(ci) { ci.value=''; ci.style.borderColor=''; }
+      document.querySelector('.custom-num-btn')?.classList.remove('applied');
       updateAvail();
     };
     nr.appendChild(p);
@@ -757,7 +788,24 @@ function updateAvail() {
   }
 }
 
-function toggleTimer() {
+function setCustomNum() {
+  const input = document.getElementById('customNum');
+  const val = parseInt(input.value);
+  if (!val || val < 1) return;
+  numQ = val;
+  // deselect pills
+  document.querySelectorAll('.num-pill').forEach(x => x.classList.remove('on'));
+  document.getElementById('customNum').style.borderColor = 'var(--gold)';
+  document.querySelector('.custom-num-btn').classList.add('applied');
+  updateAvail();
+}
+
+// Allow Enter key on custom input
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('customNum')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') setCustomNum();
+  });
+});
   timerOn = !timerOn;
   document.getElementById('timerToggle').classList.toggle('on', timerOn);
   document.getElementById('timerLabel').textContent = timerOn ? 'Activé (30s / question)' : 'Désactivé';
