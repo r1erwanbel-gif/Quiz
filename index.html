@@ -692,8 +692,8 @@ function buildSetup() {
     mg.appendChild(pill);
   });
 
-  // Session tree — all deselected by default
-  selectedSessions = new Set();
+  // Session tree — all selected by default
+  selectedSessions = new Set(sessions.map(s => s.matiere + '|||' + s.session));
   renderSessionTree(sessions, matieres);
 
   // Number pills
