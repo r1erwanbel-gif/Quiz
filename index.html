@@ -161,6 +161,22 @@ header {
 .mat-pill .pill-dot { width:6px; height:6px; border-radius:50%; background:currentColor; opacity:0.5; }
 .mat-pill.on .pill-dot { opacity:1; }
 
+.sec-label-row {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:0.9rem;
+}
+.sec-label-row .sec-label { margin-bottom:0; }
+.sess-actions { display:flex; gap:0.4rem; }
+.sess-action-btn {
+  padding:0.25rem 0.7rem;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--grey2); font-family:'DM Sans',sans-serif;
+  font-size:0.72rem; cursor:pointer;
+  border-radius:20px; transition:all 0.15s;
+}
+.sess-action-btn:hover { border-color:var(--gold); color:var(--gold); }
+
 /* session tree */
 .session-tree {
   border:1px solid var(--border);
@@ -548,7 +564,13 @@ header {
   </div>
 
   <div class="config-block">
-    <div class="sec-label">Sessions disponibles</div>
+    <div class="sec-label-row">
+      <div class="sec-label">Sessions disponibles</div>
+      <div class="sess-actions">
+        <button class="sess-action-btn" onclick="selectAllSessions()">Tout cocher</button>
+        <button class="sess-action-btn" onclick="deselectAllSessions()">Tout décocher</button>
+      </div>
+    </div>
     <div class="session-tree" id="sessionTree"></div>
   </div>
 
@@ -685,16 +707,16 @@ function buildSetup() {
   mg.innerHTML = '';
   matieres.forEach(m => {
     const pill = document.createElement('div');
-    pill.className = 'mat-pill on';
+    pill.className = 'mat-pill'; // pas 'on' par défaut
     pill.dataset.mat = m;
     pill.innerHTML = `<span class="pill-dot"></span>${m}`;
     pill.onclick = () => toggleMat(pill, m, sessions);
     mg.appendChild(pill);
   });
 
-  // Session tree — all selected by default
-  selectedSessions = new Set(sessions.map(s => s.matiere + '|||' + s.session));
-  renderSessionTree(sessions, matieres);
+  // Rien de sélectionné par défaut
+  selectedSessions = new Set();
+  renderSessionTree(sessions, []);
 
   // Number pills
   const nr = document.getElementById('numRow');
@@ -757,6 +779,25 @@ function toggleMat(pill, mat, sessions) {
   }
 
   renderSessionTree(sessions, activeMats);
+  updateAvail();
+}
+
+function selectAllSessions() {
+  const activeMats = [...document.querySelectorAll('.mat-pill.on')].map(p => p.dataset.mat);
+  document.querySelectorAll('.session-row').forEach(row => {
+    selectedSessions.add(row.dataset.key);
+    row.classList.add('on');
+    row.querySelector('.cb').textContent = '✓';
+  });
+  updateAvail();
+}
+
+function deselectAllSessions() {
+  document.querySelectorAll('.session-row').forEach(row => {
+    selectedSessions.delete(row.dataset.key);
+    row.classList.remove('on');
+    row.querySelector('.cb').textContent = '';
+  });
   updateAvail();
 }
 
