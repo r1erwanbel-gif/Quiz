@@ -332,7 +332,15 @@ header {
   transition:width 0.4s ease;
 }
 
-.q-meta {
+.q-badge-mat {
+  background: rgba(212,168,67,0.15);
+  color: var(--gold2);
+  border-color: rgba(212,168,67,0.5);
+}
+.q-badge-mat:empty { display:none; }
+
+.brand:hover .brand-icon { background: var(--gold2); }
+.brand:hover h1 { opacity:0.85; }
   display:flex; align-items:center; gap:0.6rem;
   margin-bottom:1rem;
 }
@@ -526,7 +534,7 @@ header {
 <div class="app">
 
 <header>
-  <div class="brand">
+  <div class="brand" onclick="goHome()" style="cursor:pointer;" title="Retour à l'accueil">
     <div class="brand-icon">Q</div>
     <h1>Quiz<span>Hub</span></h1>
   </div>
@@ -605,6 +613,7 @@ header {
   <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
 
   <div class="q-meta">
+    <span class="q-badge q-badge-mat" id="qBadgeMat"></span>
     <span class="q-badge" id="qBadge"></span>
   </div>
   <div class="q-text" id="qText"></div>
@@ -882,6 +891,11 @@ function renderQ() {
   document.getElementById('qN').textContent = cur+1;
   document.getElementById('progFill').style.width = (cur/quizQ.length*100)+'%';
   document.getElementById('qBadge').textContent = q.session;
+
+  // Affiche la matière seulement si plusieurs matières sélectionnées
+  const activeMats = [...new Set(quizQ.map(x => x.matiere))];
+  const matBadge = document.getElementById('qBadgeMat');
+  matBadge.textContent = activeMats.length > 1 ? q.matiere : '';
   document.getElementById('qText').textContent = q.question;
   document.getElementById('expl').classList.remove('show');
   document.getElementById('expl').innerHTML = '';
@@ -1011,6 +1025,16 @@ function showResults() {
       </div>`;
     rev.appendChild(d);
   });
+}
+
+function goHome() {
+  // Si un quiz est en cours, demande confirmation
+  if (document.getElementById('quiz').classList.contains('active')) {
+    if (!confirm('Quitter le quiz en cours ?')) return;
+  }
+  clearInterval(timerInt);
+  answered = false;
+  show('setup');
 }
 
 // ══════════════════════════════════════════════════
